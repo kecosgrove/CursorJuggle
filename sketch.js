@@ -2,10 +2,14 @@
 const framerate = 60;
 
 //Zooming vars
+var start = false;
 var zoomed = false;
 var zoomedIndex = -1;
 var canClick = true;
 var zoomTime = 2;
+
+//player score
+var score = 0;
 
 //The list of floaters being animated
 var floaterList = [];
@@ -101,7 +105,10 @@ function Bubble(x, y) {
 			this.diameter = defaultDiameter + (this.maxRadius*2*(this.progress/(framerate*zoomTime)));
 			this.x = this.oX + ((width/2)-this.oX)*2*(this.progress/(framerate*zoomTime));
 			this.y = this.oY + ((height/2)-this.oY)*2*(this.progress/(framerate*zoomTime));
-			if (this.progress == (framerate*zoomTime/2)) this.state = this.zoomed;
+			if (this.progress == (framerate*zoomTime/2)) {
+				this.state = this.zoomed;
+				zoomed = true;
+			}
 		//Unzooming
 		} else if (this.state == this.unzoom) {
 			this.progress--;
@@ -137,15 +144,13 @@ function Bubble(x, y) {
 			this.oY = this.y;
 			return true;
 		} else if (this.state == this.zoomed) {
-			//this.progress = framerate;
 			this.state = this.unzoom;
+			zoomed = false;
 			return true;
 		} else if (this.state == this.zooming) {
 			this.state = this.unzoom;
 			return true;
 		} else {
-			//do nothing?
-			//this.state = this.zooming;
 			return false;
 		}
 	}
@@ -162,8 +167,8 @@ function detectClick() {
 			if (i == zoomedIndex);
 			else if (current.mouseHit(mouseX, mouseY)) {
 				//If no shape is zoomed or if unzooming
-				if (!zoomed) {
-					zoomed = true;
+				if (!start) {
+					start = true;
 					zoomedIndex = i;
 					current.zoom();
 					break;
@@ -185,7 +190,7 @@ function detectClick() {
 function drawFloatsAndUpdate() {
 	if (zoomedIndex != -1) floaterList[zoomedIndex].draw();
 	for (var i = 0; i < floaterList.length; i++) {
-		if (!zoomed || i != zoomedIndex) {
+		if (!start || i != zoomedIndex) {
 			var current = floaterList[i];
 			current.draw();
 		}
@@ -193,8 +198,8 @@ function drawFloatsAndUpdate() {
 }
 
 //Adds a bubble to the scene
-function addBubble(data, x, y) {
-	floaterList.push(new Bubble(data, x, y));
+function addBubble(x, y) {
+	floaterList.push(new Bubble(x, y));
 }
 
 //Called when the page is loaded. Sets up the scene and starts looping the draw loop
@@ -215,9 +220,14 @@ function draw() {
 	background (0, 138, 184);
 	noStroke();
 	fill(204,153,0);
-	ellipse(width/2,height/2,350,350)
+	ellipse(width/2,height/2,350,350);
+	textAlign(CENTER);
+	textSize(40);
+	text(score, width/2 - 44, 50, 100, 100);
 	fill(0,138,184);
 	ellipse(width/2,height/2,250,250);
-	stroke(51);
+	stroke(50);
+	line(width/2, 0, width/2, height);
 	drawFloatsAndUpdate();
+	if (zoomed) score++;
 }
