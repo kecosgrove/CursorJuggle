@@ -115,7 +115,8 @@ function Bubble(x, y) {
 	}
 	this.draw = function() {
 		this.update();
-		fill(150,150,150);
+		if (this.state == this.standard || this.state == this.unzoom) fill(150);
+		else fill(50);
 		ellipse(this.x,this.y,this.diameter,this.diameter);
 	}
 	this.shape = function() {
