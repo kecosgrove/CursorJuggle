@@ -22,23 +22,22 @@ function mouseHitCircle(mousex, mousey, centerx, centery, diameter) {
 }
 
 //Bubble object
-function Bubble(data, x, y) {
-	this.data = data;
+function Bubble(x, y) {
 	this.x = x;
 	this.y = y
-	this.xSpeed = 2*Math.random();
+	this.xSpeed = 10*Math.random();
 	if (Math.random() < .5) {
 		this.xSpeed = this.xSpeed * -2;
 	}
-	this.ySpeed = 2*Math.random();
+	this.ySpeed = 10*Math.random();
 	if (Math.random() < .5) {
 		this.ySpeed = this.ySpeed * -1;
 	}
-	this.xAccel = Math.random();
+	this.xAccel = 5*Math.random();
 	if (Math.random() < .5) {
 		this.xAccel = this.xAccel * -1;
 	}
-	this.yAccel = Math.random();
+	this.yAccel = 5*Math.random();
 	if (Math.random() < .5) {
 		this.yAccel = this.yAccel * -1;
 	}
@@ -61,10 +60,14 @@ function Bubble(data, x, y) {
 	//Methods
 	this.update = function() {
 		if (this.state == this.standard) {
+			//Every frame, move and update speed
 			this.x = (this.xSpeed / 10.0) + this.x;
 			this.y = (this.ySpeed / 10.0) + this.y;
-			if (frameCount % framerate == 0) {
-				if (Math.sqrt(this.xSpeed*this.xSpeed + this.ySpeed*this.ySpeed) < 4.0) {
+			this.xSpeed = this.xAccel + this.xSpeed;
+			this.ySpeed = this.yAccel + this.ySpeed;
+			//6 times every second, update Accel
+			if (frameCount % framerate % 10 == 0) {
+				if (Math.sqrt(this.xSpeed*this.xSpeed + this.ySpeed*this.ySpeed) < 50.0) {
 					this.yAccel = Math.random();
 					if (Math.random() < .5) {
 						this.yAccel = this.yAccel*-1;
@@ -73,19 +76,21 @@ function Bubble(data, x, y) {
 					if (Math.random() < .5) {
 						this.xAccel = this.xAccel*-1;
 					}
+				//Emergency breaks
 				} else {
 					if (this.xSpeed > 0) {
-						this.xSpeed = this.xSpeed - .1;
+						this.xSpeed = this.xSpeed - 1;
 					} else {
-						this.xSpeed = this.xSpeed + .1;
+						this.xSpeed = this.xSpeed + 1;
 					}
 					if (this.ySpeed > 0) {
-						this.ySpeed = this.ySpeed - .1;
+						this.ySpeed = this.ySpeed - 1;
 					} else {
-						this.ySpeed = this.ySpeed + .1;
+						this.ySpeed = this.ySpeed + 1;
 					}
 				}
 			}
+			//Bounce off walls
 			if (this.x < (this.diameter / 2)) this.xSpeed = this.xSpeed * -1;
 			else if (this.x > (width - this.diameter / 2)) this.xSpeed = this.xSpeed * -1;
 			if (this.y < (this.diameter / 2)) this.ySpeed = this.ySpeed * -1;
@@ -111,7 +116,6 @@ function Bubble(data, x, y) {
 		this.update();
 		fill(150,150,150);
 		ellipse(this.x,this.y,this.diameter,this.diameter);
-		//ToDo, text
 	}
 	this.shape = function() {
 		return bubble;
@@ -125,56 +129,19 @@ function Bubble(data, x, y) {
 			this.state = this.zooming;
 			this.oX = this.x;
 			this.oY = this.y;
+			return true;
 		} else if (this.state == this.zoomed) {
 			this.progress = framerate/2;
 			this.state = this.unzoom;
+			return true;
 		} else if (this.state == this.zooming) {
 			this.state = this.unzoom;
+			return true;
 		} else {
-			this.state = this.zooming;
+			//do nothing?
+			//this.state = this.zooming;
+			return false;
 		}
-	}
-}
-
-
-//BubbleList Object
-function BubbleList(data, x, y) {
-	for (var i = 1; i < x.length; i++) {
-		if ((x[i-1]-x[i])*(x[i-1]-x[i]) + (y[i-1]-y[i])*(y[i-1]-y[i]) < (defaultDiameter+defaultDiameter)*(defaultDiameter+defaultDiameter)) {
-			throw "invalid input";
-			break;
-		}
-	}
-	this.dataArray = data;
-	this.xArray = x;
-	this.yArray = y;
-	this.diameter = defaultDiameter;
-	this.update = function() {
-		//ToDo
-	}
-	this.draw = function() {
-		this.update();
-		fill(150,150,150);
-		for (var i = 0; i < this.xArray.length; i++) {
-			ellipse(this.xArray[i], this.yArray[i], this.diameter, this.diameter);
-		}
-		for (var i = 1; i < this.xArray.length; i++) {
-			line(this.xArray[i-1], this.yArray[i-1], this.xArray[i], this.yArray[i]);
-		}
-	}
-	this.shape = function() {
-		return bubblelist;
-	}
-	this.mouseHit = function(mousex, mousey) {
-		for (var i = 0; i < this.xArray.length; i++) {
-			if (mouseHitCircle(mousex, mousey, this.xArray[i], this.yArray[i], this.diameter)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	this.zoom = function() {
-		//ToDo
 	}
 }
 
@@ -184,8 +151,7 @@ function detectClick() {
 		canClick = false;
 		//For each shape
 		if (zoomed && floaterList[zoomedIndex].mouseHit(mouseX, mouseY)) {
-			zoomed = false;
-			floaterList[zoomedIndex].zoom();
+			return;
 		} else {
 			for (var i = 0; i < floaterList.length; i++) {
 				var current = floaterList[i];
@@ -198,9 +164,10 @@ function detectClick() {
 						current.zoom();
 						break;
 					} else {
-						current.zoom();
-						floaterList[zoomedIndex].zoom();
-						zoomedIndex = i;
+						if (current.zoom()) {
+							floaterList[zoomedIndex].zoom()
+							zoomedIndex = i;
+						}
 						break;
 					}
 				}
@@ -211,16 +178,43 @@ function detectClick() {
 	}
 }
 
+//Click detection
+function detectClick2() {
+	if (mouseIsPressed && (mouseButton == LEFT) && canClick) {
+		canClick = false;
+		//For each shape
+		for (var i = 0; i < floaterList.length; i++) {
+			var current = floaterList[i];
+			//If the click is registered
+			if (i == zoomedIndex);
+			else if (current.mouseHit(mouseX, mouseY)) {
+				//If no shape is zoomed or if unzooming
+				if (!zoomed) {
+					zoomed = true;
+					zoomedIndex = i;
+					current.zoom();
+					break;
+				} else {
+					if (current.zoom()) {
+						floaterList[zoomedIndex].zoom()
+						zoomedIndex = i;
+					}
+					break;
+				}
+			}
+		}
+	} else if (!mouseIsPressed || !(mouseButton == LEFT)) {
+		canClick = true;
+	}
+}
+
 function drawFloatsAndUpdate() {
-	var lastDraw = -1;
+	if (zoomedIndex != -1) floaterList[zoomedIndex].draw();
 	for (var i = 0; i < floaterList.length; i++) {
 		if (!zoomed || i != zoomedIndex) {
 			var current = floaterList[i];
 			current.draw();
-		} else lastDraw = i;
-	}
-	if (lastDraw >= 0) {
-			floaterList[lastDraw].draw();
+		}
 	}
 }
 
@@ -231,16 +225,22 @@ function addBubble(data, x, y) {
 function setup() {
   createCanvas(windowWidth/2, windowHeight);
   frameRate(framerate);
-  addBubble("data", width/2, height/2);
-  addBubble("data", width/4, height/4);
-  addBubble("data", 3*width/4, height/4);
-  addBubble("data", 3*width/4, 3*height/4);
-  addBubble("data", width/4, 3*height/4);
+  addBubble(width/2, height/2);
+  addBubble(width/4, height/4);
+  addBubble(3*width/4, height/4);
+  addBubble(3*width/4, 3*height/4);
+  addBubble(width/4, 3*height/4);
   loop();
 }
 
 function draw() {
-	detectClick();
+	detectClick2();
 	background (0, 138, 184);
+	noStroke();
+	fill(204,153,0);
+	ellipse(width/2,height/2,350,350)
+	fill(0,138,184);
+	ellipse(width/2,height/2,250,250);
+	stroke(51);
 	drawFloatsAndUpdate();
 }
