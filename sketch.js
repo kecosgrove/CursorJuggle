@@ -9,6 +9,7 @@ const bubblelist = 1;
 var zoomed = false;
 var zoomedIndex = -1;
 var canClick = true;
+var zoomTime = 2;
 
 //The list of floaters being animated
 var floaterList = [];
@@ -97,15 +98,15 @@ function Bubble(x, y) {
 			else if (this.y > (height - this.diameter / 2)) this.ySpeed = this.ySpeed * -1;
 		} else if (this.state == this.zooming) {
 			this.progress++;
-			this.diameter = defaultDiameter + (this.maxRadius*2*(this.progress/framerate));
-			this.x = this.oX + ((width/2)-this.oX)*2*(this.progress/framerate);
-			this.y = this.oY + ((height/2)-this.oY)*2*(this.progress/framerate);
-			if (this.progress == framerate/2) this.state = this.zoomed;
+			this.diameter = defaultDiameter + (this.maxRadius*2*(this.progress/(framerate*zoomTime)));
+			this.x = this.oX + ((width/2)-this.oX)*2*(this.progress/(framerate*zoomTime));
+			this.y = this.oY + ((height/2)-this.oY)*2*(this.progress/(framerate*zoomTime));
+			if (this.progress == (framerate*zoomTime/2)) this.state = this.zoomed;
 		} else if (this.state == this.unzoom) {
 			this.progress--;
-			this.diameter = defaultDiameter + (this.maxRadius*2*(this.progress/framerate));
-			this.x = this.oX + ((width/2)-this.oX)*2*(this.progress/framerate);
-			this.y = this.oY + ((height/2)-this.oY)*2*(this.progress/framerate);
+			this.diameter = defaultDiameter + (this.maxRadius*2*(this.progress/(framerate*zoomTime)));
+			this.x = this.oX + ((width/2)-this.oX)*2*(this.progress/(framerate*zoomTime));
+			this.y = this.oY + ((height/2)-this.oY)*2*(this.progress/(framerate*zoomTime));
 			if (this.progress == 0) {
 				this.state = this.standard;
 				this.progress = -1;
@@ -131,7 +132,7 @@ function Bubble(x, y) {
 			this.oY = this.y;
 			return true;
 		} else if (this.state == this.zoomed) {
-			this.progress = framerate/2;
+			//this.progress = framerate;
 			this.state = this.unzoom;
 			return true;
 		} else if (this.state == this.zooming) {
