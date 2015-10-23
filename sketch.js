@@ -150,39 +150,6 @@ function detectClick() {
 	if (mouseIsPressed && (mouseButton == LEFT) && canClick) {
 		canClick = false;
 		//For each shape
-		if (zoomed && floaterList[zoomedIndex].mouseHit(mouseX, mouseY)) {
-			return;
-		} else {
-			for (var i = 0; i < floaterList.length; i++) {
-				var current = floaterList[i];
-				//If the click is registered
-				if (current.mouseHit(mouseX, mouseY)) {
-					//If no shape is zoomed or if unzooming
-					if (!zoomed) {
-						zoomed = true;
-						zoomedIndex = i;
-						current.zoom();
-						break;
-					} else {
-						if (current.zoom()) {
-							floaterList[zoomedIndex].zoom()
-							zoomedIndex = i;
-						}
-						break;
-					}
-				}
-			}
-		}
-	} else if (!mouseIsPressed || !(mouseButton == LEFT)) {
-		canClick = true;
-	}
-}
-
-//Click detection
-function detectClick2() {
-	if (mouseIsPressed && (mouseButton == LEFT) && canClick) {
-		canClick = false;
-		//For each shape
 		for (var i = 0; i < floaterList.length; i++) {
 			var current = floaterList[i];
 			//If the click is registered
@@ -234,7 +201,7 @@ function setup() {
 }
 
 function draw() {
-	detectClick2();
+	detectClick();
 	background (0, 138, 184);
 	noStroke();
 	fill(204,153,0);
