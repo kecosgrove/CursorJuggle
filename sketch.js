@@ -1,10 +1,6 @@
 //Framerate
 const framerate = 60;
 
-//Shape enumeration
-const bubble = 0;
-const bubblelist = 1;
-
 //Zooming vars
 var zoomed = false;
 var zoomedIndex = -1;
@@ -18,6 +14,7 @@ var floaterList = [];
 const defaultDiameter = 50;
 const defaultSize = 14;
 
+//Returns boolean indicating if the point specified is inside a circle
 function mouseHitCircle(mousex, mousey, centerx, centery, diameter) {
 	return (diameter/2) > Math.sqrt((centerx - mousex)*(centerx - mousex) + (centery - mousey)*(centery - mousey));
 }
@@ -59,6 +56,8 @@ function Bubble(x, y) {
 	this.progress = -1;
 	this.diameter = defaultDiameter;
 	//Methods
+
+	//Called every frame to update instance vars of position, speed and acceleration
 	this.update = function() {
 		if (this.state == this.standard) {
 			//Every frame, move and update speed
@@ -96,12 +95,14 @@ function Bubble(x, y) {
 			else if (this.x > (width - this.diameter / 2)) this.xSpeed = this.xSpeed * -1;
 			if (this.y < (this.diameter / 2)) this.ySpeed = this.ySpeed * -1;
 			else if (this.y > (height - this.diameter / 2)) this.ySpeed = this.ySpeed * -1;
+		//Zooming
 		} else if (this.state == this.zooming) {
 			this.progress++;
 			this.diameter = defaultDiameter + (this.maxRadius*2*(this.progress/(framerate*zoomTime)));
 			this.x = this.oX + ((width/2)-this.oX)*2*(this.progress/(framerate*zoomTime));
 			this.y = this.oY + ((height/2)-this.oY)*2*(this.progress/(framerate*zoomTime));
 			if (this.progress == (framerate*zoomTime/2)) this.state = this.zoomed;
+		//Unzooming
 		} else if (this.state == this.unzoom) {
 			this.progress--;
 			this.diameter = defaultDiameter + (this.maxRadius*2*(this.progress/(framerate*zoomTime)));
@@ -113,18 +114,21 @@ function Bubble(x, y) {
 			}
 		}
 	}
+
+	//Calls update and then draws shape
 	this.draw = function() {
 		this.update();
 		if (this.state == this.standard || this.state == this.unzoom) fill(150);
 		else fill(50);
 		ellipse(this.x,this.y,this.diameter,this.diameter);
 	}
-	this.shape = function() {
-		return bubble;
-	}
+
+	//Determines if a given set of coordinates hits this shape
 	this.mouseHit = function(mousex, mousey) {
 		return mouseHitCircle(mousex, mousey, this.x, this.y, this.diameter);
 	}
+
+	//Begins to zoom or changes the direction of zoom.
 	this.zoom = function() { 
 		if (this.state == this.standard) {
 			this.progress = 0;
@@ -177,6 +181,7 @@ function detectClick() {
 	}
 }
 
+//Calls each bubble's draw method
 function drawFloatsAndUpdate() {
 	if (zoomedIndex != -1) floaterList[zoomedIndex].draw();
 	for (var i = 0; i < floaterList.length; i++) {
@@ -187,10 +192,12 @@ function drawFloatsAndUpdate() {
 	}
 }
 
+//Adds a bubble to the scene
 function addBubble(data, x, y) {
 	floaterList.push(new Bubble(data, x, y));
 }
 
+//Called when the page is loaded. Sets up the scene and starts looping the draw loop
 function setup() {
   createCanvas(windowWidth/2, windowHeight);
   frameRate(framerate);
@@ -202,6 +209,7 @@ function setup() {
   loop();
 }
 
+//Loops every frame
 function draw() {
 	detectClick();
 	background (0, 138, 184);
