@@ -202,6 +202,28 @@ function addBubble(x, y) {
 	floaterList.push(new Bubble(x, y));
 }
 
+function drawScore() {
+	fill(204,153,0);
+	textAlign(CENTER);
+	textSize(40);
+	text(score, width/2 - 44, 50, 100, 100);
+}
+
+function drawTarget() {
+	var sizeDifference;
+	if (width > height) {
+		sizeDifference = height * .25;
+	} else {
+		sizedifference = width * .25;
+	}
+	var innerR = defaultDiameter + sizeDifference;
+	fill(204,153,0);
+	ellipse(width/2,height/2,innerR*1.5,innerR*1.5);
+	fill(0,138,184);
+	ellipse(width/2,height/2,innerR, innerR);
+	drawScore();
+}
+
 //Called when the page is loaded. Sets up the scene and starts looping the draw loop
 function setup() {
   createCanvas(windowWidth/2, windowHeight);
@@ -219,15 +241,8 @@ function draw() {
 	detectClick();
 	background (0, 138, 184);
 	noStroke();
-	fill(204,153,0);
-	ellipse(width/2,height/2,350,350);
-	textAlign(CENTER);
-	textSize(40);
-	text(score, width/2 - 44, 50, 100, 100);
-	fill(0,138,184);
-	ellipse(width/2,height/2,250,250);
+	drawTarget();
 	stroke(50);
-	line(width/2, 0, width/2, height);
 	drawFloatsAndUpdate();
 	if (zoomed) score++;
 }
