@@ -226,7 +226,8 @@ function drawTarget() {
 
 //Called when the page is loaded. Sets up the scene and starts looping the draw loop
 function setup() {
-  createCanvas(windowWidth/2, windowHeight);
+  //createCanvas(windowWidth/2, windowHeight);
+  createCanvas(500, 500);
   frameRate(framerate);
   addBubble(width/2, height/2);
   addBubble(width/4, height/4);
