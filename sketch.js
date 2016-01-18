@@ -1,5 +1,7 @@
 //Framerate
 const framerate = 60;
+var paused = false;
+var maxScore = Infinity;
 
 //Zooming vars
 var start = false;
@@ -239,11 +241,18 @@ function setup() {
 
 //Loops every frame
 function draw() {
-	detectClick();
-	background (0, 138, 184);
-	noStroke();
-	drawTarget();
-	stroke(50);
-	drawFloatsAndUpdate();
-	if (zoomed) score++;
+	if (!paused) {
+		if (score >= maxScore) {
+			score = 0;
+			reset();
+		} else {
+			detectClick();
+			background (0, 138, 184);
+			noStroke();
+			drawTarget();
+			stroke(50);
+			drawFloatsAndUpdate();
+			if (zoomed) score++;
+		}
+	}
 }

@@ -2,7 +2,13 @@
 
 //unzooms all objects, resets scores to 0
 function reset() {
-	if (zoomedIndex > -1) floaterList[zoomedIndex].zoom();
+	pause = false;
+	if (zoomedIndex > -1) {
+		floaterList[zoomedIndex].zoom();
+		start = false;
+		zoomed = false;
+		zoomedIndex = -1;
+	}
 	score = 0; 
 }
 
@@ -13,15 +19,15 @@ function getScore() {
 
 //freezes the scene
 function pause() {
-
+	paused = true;
 }
 
 //unfreezes the scene
 function unpause() {
-
+	paused = false;
 }
 
 //set a value at which the scene will reset, returns current score.
-function setMaxScore() {
-	
+function setMaxScore(max) {
+	maxScore = max;
 }
